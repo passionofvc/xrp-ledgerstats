@@ -31,7 +31,7 @@ if (fs.existsSync(__dirname + '/data/' + filename)) {
     console.log('Reading ledger stats:', filename)
     let data = JSON.parse(fs.readFileSync(__dirname + '/data/' + filename))
     data.balances.sort((a, b) => { return (a.b > b.b) ? -1 : ((b.b > a.b) ? 1 : 0) })
-    
+
     let numberOfAccounts = data.balances.length
     console.log(' -- Accounts:             ', numberOfAccounts)
     exportJson.meta.numberAccounts = numberOfAccounts
@@ -65,9 +65,9 @@ if (fs.existsSync(__dirname + '/data/' + filename)) {
     percentages.forEach(p => {
         let n = Math.round(numberOfAccounts / 100 * p)
         let e = data.balances.slice(0, n).reverse()[0].b
-        pctAccountsBalance.push([ 
-            p + ' %', 
-            numeral(n).format('0,0.'), 
+        pctAccountsBalance.push([
+            p + ' %',
+            numeral(n).format('0,0.'),
             numeral(e).format('0,0.000000') + ' XRP'
         ])
         exportJson.accountPercentageBalance.push({
@@ -76,7 +76,7 @@ if (fs.existsSync(__dirname + '/data/' + filename)) {
             balanceEqGt: e
         })
     })
-    console.log(table(pctAccountsBalance, { 
+    console.log(table(pctAccountsBalance, {
         columns: {
             0: { alignment: 'right' },
             1: { alignment: 'right' },
@@ -106,7 +106,7 @@ if (fs.existsSync(__dirname + '/data/' + filename)) {
                 a++
             }
         }
-        noAccountsBalanceRange.push([ 
+        noAccountsBalanceRange.push([
             numeral(a).format('0,0.'),
             numeral(f).format('0,0.'),
             lastBalanceRange === 0 ? '∞' : numeral(t).format('0,0.'),
@@ -120,7 +120,7 @@ if (fs.existsSync(__dirname + '/data/' + filename)) {
         })
         lastBalanceRange = b
     })
-    console.log(table(noAccountsBalanceRange, { 
+    console.log(table(noAccountsBalanceRange, {
         columns: {
             0: { alignment: 'right' },
             1: { alignment: 'right' },

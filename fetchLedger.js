@@ -4,6 +4,11 @@ const numeral = require('numeral')
 const fs = require('fs')
 const JSONStream = require('JSONStream')
 const WebSocket = require('ws')
+
+const csvWriter = require('csv-write-stream');
+const writer = csvWriter({sendHeaders: false});
+
+
 let endpoint = 'wss://s1.ripple.com'
 if (process.argv.length > 3) {
   endpoint = process.argv[3]
@@ -36,7 +41,7 @@ ws.on('open', function open () {
   }
   send({ command: 'ledger', ledger_index: requestLedgerIndex })
 })
- 
+
 let req = { command: 'ledger_data', ledger: null, type: 'account', limit: 20000 }
 ws.on('message', function incoming (data) {
   const r = JSON.parse(data)
@@ -59,14 +64,10 @@ ws.on('message', function incoming (data) {
         close_time_human: ledger.close_time_human,
         total_coins: parseInt(ledger.total_coins) / 1000000
       }
-      transformStream = JSONStream.stringify('{\n  "stats": ' + JSON.stringify(stats) + ',\n  "balances": [\n    ', ',\n    ', '\n  ]\n}\n')
       outputStream = fs.createWriteStream(__dirname + '/data/' + filename)
-      transformStream.pipe(outputStream)
+      writer.pipe(outputStream)
+
       outputStream.on('finish', function handleFinish () {
-        console.log('')
-        console.log('Done! wrote records:', records, 'to:', './data/' + filename)
-        console.log('')
-        console.log('Now you can retrieve the stats for this ledger by running:')
         console.log('  npm run stats ' + ledger.ledger_index)
         console.log('')
         process.exit(0)
@@ -82,19 +83,18 @@ ws.on('message', function incoming (data) {
       if (r.result.state !== null) {
         r.result.state.forEach((i) => {
           records++
-          transformStream.write({ a: i.Account, b: parseInt(i.Balance) / 1000000 })
+          writer.write({ "a" : i.Account, "b" : parseInt(i.Balance) / 1000000 } )
         })
       }
-      
+
       process.stdout.write('  > Retrieved '  + records + ' accounts in ' + calls + ' calls to rippled...' + "\r");
 
       if (typeof r.result.marker === 'undefined' || r.result.marker === null || r.result.marker === lastMarker) {
         // No new marker
         console.log('')
-
-        transformStream.end()
+        writer.end()
       } else {
-        // Continue 
+        // Continue
         req.marker = r.result.marker
         lastMarker = req.marker
         send(req)
