@@ -13,7 +13,8 @@
     "fetch": "node fetchLedger.js",
     "stats": "node parseLedgerFile.js",
     "batch": "bash batchFetchCalc.sh",
-    "sort":  "bash batchSortCsv.sh"
+    "sort":  "bash batchSortCsv.sh",
+    "filter": "bash batchFilterCsv.sh"
   },
   "repository": {
     "type": "git",
